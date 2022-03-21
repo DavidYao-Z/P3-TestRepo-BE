@@ -6,7 +6,7 @@ pipeline {
 //    tools {}
 
     environment {
-        AWS_ACCOUNT_ID="540303298966"
+        AWS_ACCOUNT_ID="704651416466"
         AWS_DEFAULT_REGION="ap-southeast-2"
         JENKINS_AWS_ID="p3.aws.credentials"
         IMAGE_REPO_NAME="p3backendimagerepo"
@@ -14,8 +14,8 @@ pipeline {
         //IMAGE_TAG="${env.BUILD_NUMBER}"
         //AWSCLI_DIR = '/usr/local/bin/'
         REPOSITORY_URL = "https://${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
-        AWS_ECS_CLUSTER="P3-ECSCluster"
-        AWS_ECS_SERVICE="P3-ECSService"
+        AWS_ECS_CLUSTER="CG-BE-Cluster"
+        AWS_ECS_SERVICE="CG-BE-Service"
         
     }
 
@@ -24,7 +24,7 @@ pipeline {
             steps {
                 script {
                     echo 'Git Cloning..'
-                    checkout([$class: 'GitSCM', branches: [[name: '*/dev']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/CreativeGang/DevForum-be.git']]])
+                    checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavidYao-Z/P3-TestRepo-BE.git']]])
                 }
             }
 
@@ -68,7 +68,7 @@ pipeline {
                 echo 'ECS Deploying....'
                 script{
                     withAWS(region: 'ap-southeast-2', credentials: 'p3.aws.credentials') {
-                                sh 'aws ecs update-service --region ap-southeast-2 --cluster P3-ECSCluster --service P3-ECSService --force-new-deployment'
+                                sh 'aws ecs update-service --region ap-southeast-2 --cluster CG-BE-Cluster --service CG-BE-Service --force-new-deployment'
                     }
                 }
             }
