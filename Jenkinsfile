@@ -8,7 +8,7 @@ pipeline {
     environment {
         AWS_ACCOUNT_ID="704651416466"
         AWS_DEFAULT_REGION="ap-southeast-2"
-        JENKINS_AWS_ID="p3.aws.credentials"
+        JENKINS_AWS_ID="p3.aws.credentials-AP_SOUTHEAST_2"
         IMAGE_REPO_NAME="p3backendimagerepo"
         IMAGE_TAG="latest"
         //IMAGE_TAG="${env.BUILD_NUMBER}"
