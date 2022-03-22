@@ -8,7 +8,7 @@ pipeline {
     environment {
         AWS_ACCOUNT_ID="704651416466"
         AWS_DEFAULT_REGION="ap-southeast-2"
-        JENKINS_AWS_ID="p3.aws.credentials-AP_SOUTHEAST_2"
+        JENKINS_AWS_ID="p3.aws.credentials"
         IMAGE_REPO_NAME="p3backendimagerepo"
         IMAGE_TAG="latest"
         //IMAGE_TAG="${env.BUILD_NUMBER}"
@@ -40,12 +40,20 @@ pipeline {
             }
         }
 
-        stage('Docker Image Building & push to ECR') {
+        stage("Build image") {
             steps {
-                echo 'Building image..'
+                echo "==============Building image=============="
+                script {
+                    myImage = docker.build("${IMAGE_REPO_NAME}")
+                }
+            }
+        }
+
+        stage('push to ECR') {
+            steps {
+                echo 'Pushing image..'
                 script {
                     docker.withRegistry("${REPOSITORY_URL}","ecr:${AWS_DEFAULT_REGION}:${JENKINS_AWS_ID}"){
-                        def myImage = docker.build("${IMAGE_REPO_NAME}")
                         myImage.push("${IMAGE_TAG}")
                     }
                 }
