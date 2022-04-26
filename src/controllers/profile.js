@@ -1,6 +1,7 @@
 const Profile = require('../models/Profile');
 const request = require('request');
 const User = require('../models/User');
+const Post = require('../models/Post')
 const getValidationError = require('../utils/getValidationError');
 
 const getAuthProfile = async (req, res) => {
@@ -42,7 +43,8 @@ const createProfile = async (req, res) => {
   if (location) profileFields.location = location;
   if (bio) profileFields.bio = bio;
   if (status) profileFields.status = status;
-  if (githubusername) profileFields.githubusername = githubusername;
+  // if (githubusername) profileFields.githubusername = githubusername;
+  githubusername ?  profileFields.githubusername = githubusername :  profileFields.githubusername = ''
   if (skills) {
     profileFields.skills = skills.split(',').map((skill) => skill.trim());
   }
@@ -93,8 +95,8 @@ const createProfile = async (req, res) => {
 
 const getAllProfile = async (req, res) => {
   try {
-    const profiles = await Profile.find().populate('user', ['name']);
-    res.json(profiles);
+    const profiles = await Profile.find().populate('user', ['name', 'photo']);
+    return res.json(profiles);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -105,9 +107,9 @@ const getProfileById = async (req, res) => {
   try {
     const profile = await Profile.findOne({
       user: req.params.user_id,
-    }).populate('user', ['name']);
+    }).populate('user', ['name', 'photo','email']);
     if (!profile) return res.status(400).json({ msg: 'Profile not found' });
-    res.json(profile);
+    return res.json(profile);
   } catch (err) {
     console.error(err.message);
     if (err.kind == 'ObjectId') {
@@ -120,12 +122,11 @@ const getProfileById = async (req, res) => {
 const deleteProfile = async (req, res) => {
   try {
     //@todo - Remove users posts
+    await Post.deleteMany({user: req.user.id})
     //Remove profile
     await Profile.findOneAndRemove({ user: req.user.id });
     //Remove user
-    // const user = await User.find({ user: req.user.id });
-    await User.findOneAndRemove({ user: req.user.id });
-
+    await User.findOneAndRemove({  _id: req.user.id });
     res.json({ msg: 'User deleted' });
   } catch (err) {
     console.error(err.message);
@@ -172,7 +173,7 @@ const deleteExperienceById = async (req, res) => {
     // }
     profile.experience.splice(removeIndex, 1);
     await profile.save();
-    res.json(profile);
+    return res.json(profile);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -200,7 +201,7 @@ const addEducation = async (req, res) => {
       return res.status(400).json({ msg: { errorArray } });
     }
     await profile.save();
-    res.json(profile);
+    return res.json(profile);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -216,7 +217,7 @@ const deleteEducationById = async (req, res) => {
       .indexOf(req.params.edu_id);
     profile.education.splice(removeIndex, 1);
     await profile.save();
-    res.json(profile);
+    return res.json(profile);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -233,9 +234,9 @@ const getGithubRepo = (req, res) => {
     request(option, (err, response, body) => {
       if (err) console.error(error);
       if (response.statusCode !== 200) {
-        res.status(404).json({ msg: 'No Github Profile Found' });
+        return res.status(404).json({ msg: 'No Github Profile Found' });
       }
-      res.json(JSON.parse(body));
+      return res.json(JSON.parse(body));
     });
   } catch (err) {
     console.error(err.message);
